@@ -2,7 +2,8 @@
 
 #### 测试运行环境
 * **Python 3.x**
-* **Ubuntu or macOS**
+* **Pythonista for iOS**
+* **iPad pro 12.9 (2015)**
 
 ## Experiment 1 : Process  Management
 
@@ -150,7 +151,7 @@ result: 2
 
 ### 代码
 
-```py
+```python
 # -*- coding: utf-8 -*-
 
 class processScheduling(object):
@@ -354,7 +355,7 @@ E的完成时间为: 17，周转时间为: 9，带权周转时间为: 4.5
 ### 代码
 
 
-```py
+```python
 # -*- coding: utf-8 -*-
 import time
 import console
@@ -453,7 +454,7 @@ FIFO：
 
 ### 代码
 
-```py
+```python
 # -*- coding: utf-8 -*-
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
@@ -586,7 +587,7 @@ SSTF的结果：
 
 ### 代码
 
-```py
+```python
 # -*- coding: utf-8 -*-
 '''
 file:
