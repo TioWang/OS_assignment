@@ -100,9 +100,6 @@ Note over 孙子进程: return 0 结束
 ```
 
 ```py
-# -*- coding: utf-8 -*-
-import os
-command = input("enter command(enter q to quit): ")
 while command :
 	if command == 'q':
 		exit(0)
@@ -152,159 +149,115 @@ result: 2
 ### 代码
 
 ```python
-# -*- coding: utf-8 -*-
-
-class processScheduling(object):
-	
-	def __init__(self,path):
-		self.path = path
-		self.processtable = {}
+def FCFS(self):
+	time = 0
+	result = []
+	for x in sorted(self.processtable.keys()):
+		time += self.processtable[x][1]
+		tat = self.TAT(time , self.processtable[x][0])
+		result.append([x ,str(time),str(tat),str(self.WTAT(tat,self.processtable[x][1]))])
+	self.printResult(result)
 		
-	def readProcess(self):
-		extension = self.path.split('.')[-1]
-		if extension != 'process':
-			print("file’s extension is not .process, please check the file!")
-			exit(-1)
-		processes = open(self.path,'r',encoding = 'utf-8').readlines()
-		for process in processes:
-			if '#' in process:
-				continue
-			self.processtable[process.split(' ')[0]] = [int(process.split(' ')[1]),int(process.split(' ')[2][:-1])]
-		 
-	def TAT(self,t,st):
-		return t - st
-	
-	def WTAT(self,t,ts):
-		return float(t)/ts
-	
-	def printResult (self,result):
-		Result = sorted(result, key = lambda e:e[0])
-		for i in Result:
-			print (i[0] + "的完成时间为: " + i[1] + "，周转时间为: " + i[2] + "，带权周转时间为: " + i[3])
-	
-	def FCFS(self):
-		time = 0
-		result = []
-		for x in sorted(self.processtable.keys()):
-			time += self.processtable[x][1]
-			tat = self.TAT(time , self.processtable[x][0])
-			result.append([x ,str(time),str(tat),str(self.WTAT(tat,self.processtable[x][1]))])
-		self.printResult(result)
-		
-	def RR(self):
-		i = 0
-		pro = sorted(self.processtable.keys())
-		job = []
-		history = []
-		result = []
-		for robin in range(1000):
-			while robin + 1 >= self.processtable[pro[i]][0] :#该时间后一时间片是否有新的进程加入
-				if pro[i] not in history:#此进程没出出现过，加入job队列
-					job.append([pro[i],self.processtable[pro[i]][1]])
-					history.append(pro[i])
-				i += 1
-				if i == len(pro):
-					break
-			i = 0
-			if len(job) :#如果有作业
-				job[0][1] -= 1#首任务执行一个时间片
-				if job[0][1] == 0:#如果该任务已经执行完成
-					tat = self.TAT(robin+1,self.processtable[job[0][0]][0])
-					result.append([job[0][0] , str(robin + 1 ) , str(tat) , str(self.WTAT(tat,self.processtable[job[0][0]][1]) )])			
-					job.pop(0)
-				else:
-					job.append(job[0])#如果没有完成则将作业放入队尾
-					job.pop(0)
-			elif robin < self.processtable[pro[-1]][0] :#如果后面还有作业
-				continue
-			else:
+def RR(self):
+	i = 0
+	pro = sorted(self.processtable.keys())
+	job = []
+	history = []
+	result = []
+	for robin in range(1000):
+		while robin + 1 >= self.processtable[pro[i]][0] :#该时间后一时间片是否有新的进程加入
+			if pro[i] not in history:#此进程没出出现过，加入job队列
+				job.append([pro[i],self.processtable[pro[i]][1]])
+				history.append(pro[i])
+			i += 1
+			if i == len(pro):
 				break
-		self.printResult(result)
+		i = 0
+		if len(job) :#如果有作业
+			job[0][1] -= 1#首任务执行一个时间片
+			if job[0][1] == 0:#如果该任务已经执行完成
+				tat = self.TAT(robin+1,self.processtable[job[0][0]][0])
+				result.append([job[0][0] , str(robin + 1 ) , str(tat) , str(self.WTAT(tat,self.processtable[job[0][0]][1]) )])			
+				job.pop(0)
+			else:
+				job.append(job[0])#如果没有完成则将作业放入队尾
+				job.pop(0)
+		elif robin < self.processtable[pro[-1]][0] :#如果后面还有作业
+			continue
+		else:
+			break
+	self.printResult(result)
 	
-	def SJF(self):#短作业优先调度
+def SJF(self):#短作业优先调度
 	
-		pro = sorted(self.processtable.items(), key = lambda  e:e[1][0])#根据作业到达时间排序
-		job = []
-		time = 0
-		result = []
-		while pro :
-			for pros in pro:
-				if time >= self.processtable[pros[0]][0] and [self.processtable[pros[0]][1],pros[0]] not in job :#作业已到达，加入job队列
-					job.append([self.processtable[pros[0]][1],pros[0]])
-			job.sort()#根据服务时间排序，短作业优先
+	pro = sorted(self.processtable.items(), key = lambda  e:e[1][0])#根据作业到达时间排序
+	job = []
+	time = 0
+	result = []
+	while pro :
+		for pros in pro:
+			if time >= self.processtable[pros[0]][0] and [self.processtable[pros[0]][1],pros[0]] not in job :#作业已到达，加入job队列
+				job.append([self.processtable[pros[0]][1],pros[0]])
+		job.sort()#根据服务时间排序，短作业优先
 		
-			time += job[0][0]
-			tat = self.TAT(time,self.processtable[job[0][1]][0])
-			result.append([job[0][1],str(time),str(tat),str(self.WTAT(tat,self.processtable[job[0][1]][1]) )])				
-			pro.remove((job[0][1],self.processtable[job[0][1]]))
-			job.pop(0)
-		self.printResult(result)
-		
-	def priority(self,wTime,sTime):#计算优先权
-		 return float(wTime + sTime) / sTime
+		time += job[0][0]
+		tat = self.TAT(time,self.processtable[job[0][1]][0])
+		result.append([job[0][1],str(time),str(tat),str(self.WTAT(tat,self.processtable[job[0][1]][1]) )])				
+		pro.remove((job[0][1],self.processtable[job[0][1]]))
+		job.pop(0)
+	self.printResult(result)
 	
-	def DHRN(self):#抢占式动态优先权最高响应比优先算法
-		time = 0
-		pro = sorted(self.processtable.items(), key = lambda  e:e[1][0])
-		Property = {}
-		job = {}
-		handle = (' ')
-		result= []
-		while pro:
-			for pros in pro :
-				if time >= self.processtable[pros[0]][0] and pros[0] not in job :
-					job[pros[0]] = [self.processtable[pros[0]][1],self.processtable[pros[0]][1]]	
-			for j in job:
-				if handle[0] == j:
-					continue
-				P = priority(time , job[j][0])
-				Property[j] = P	
-			handle = sorted(Property.items(), key = lambda  e:e[1])[-1]
-			time += 1 #self.processtable[handle[0]][1]
-			job[handle[0]][1] -= 1
-			if job[handle[0]][1] == 0: 
-				tat = self.TAT(time,self.processtable[handle[0]][0])	
-				result.append([handle[0],str(time),str(tat),str(self.WTAT(tat,self.processtable[handle[0]][1]))])		
-				pro.remove((handle[0],self.processtable[handle[0]]))
-				job.pop(handle[0])
-				Property.pop(handle[0])
-		self.printResult(result)
+def priority(self,wTime,sTime):#计算优先权
+		return float(wTime + sTime) / sTime
+	
+def DHRN(self):#抢占式动态优先权最高响应比优先算法
+	time = 0
+	pro = sorted(self.processtable.items(), key = lambda  e:e[1][0])
+	Property = {}
+	job = {}
+	handle = (' ')
+	result= []
+	while pro:
+		for pros in pro :
+			if time >= self.processtable[pros[0]][0] and pros[0] not in job :
+				job[pros[0]] = [self.processtable[pros[0]][1],self.processtable[pros[0]][1]]	
+		for j in job:
+			if handle[0] == j:
+				continue
+			P = priority(time , job[j][0])
+			Property[j] = P	
+		handle = sorted(Property.items(), key = lambda  e:e[1])[-1]
+		time += 1 #self.processtable[handle[0]][1]
+		job[handle[0]][1] -= 1
+		if job[handle[0]][1] == 0: 
+			tat = self.TAT(time,self.processtable[handle[0]][0])	
+			result.append([handle[0],str(time),str(tat),str(self.WTAT(tat,self.processtable[handle[0]][1]))])		
+			pro.remove((handle[0],self.processtable[handle[0]]))
+			job.pop(handle[0])
+			Property.pop(handle[0])
+	self.printResult(result)
 		
-	def HRN(self):
-		time = 0 
-		pros = sorted(self.processtable.items() , key = lambda e:e[1][0])
-		Property = {}
-		jobs = {}
-		result = []
-		while pros:
-			for pro in pros:
-				if time>= self.processtable[pro[0]][0] and pro[0] not in jobs:
-					jobs[pro[0]] = self.processtable[pro[0]][1]
-			for job in jobs:#动态计算优先权
-				P = self.priority(time - self.processtable[job][0], jobs[job])
-				Property[job] = P
-			handle = sorted(Property.items(), key = lambda e:e[1])[-1]#根据优先权排序
-			time += jobs[handle[0]]
-			tat = self.TAT(time,self.processtable[handle[0]][0])
-			result.append([handle[0],str(time),str(tat),str(self.WTAT(tat,self.processtable[handle[0]][1]))] )				
-			pros.remove((handle[0],self.processtable[handle[0]]))
-			jobs.pop(handle[0])
-			Property.clear()		 
-		self.printResult(result)
-
-if __name__ == "__main__":
-	path = input('Enter the process table path :')
-	process = processScheduling(path)
-	process.readProcess()
-	print (" - - - - - - - — - - - - - — - - - - - ")
-	process.FCFS()
-	print (" - - - - - - - — - - - - - — - - - - - ")
-	process.RR()
-	print (" - - - - - - - — - - - - - — - - - - - ")
-	process.SJF()
-	print (" - - - - - - - — - - - - - — - - - - - ")
-	process.HRN()
-	print (" - - - - - - - — - - - - - — - - - - - ")
+def HRN(self):
+	time = 0 
+	pros = sorted(self.processtable.items() , key = lambda e:e[1][0])
+	Property = {}
+	jobs = {}
+	result = []
+	while pros:
+		for pro in pros:
+			if time>= self.processtable[pro[0]][0] and pro[0] not in jobs:
+				jobs[pro[0]] = self.processtable[pro[0]][1]
+		for job in jobs:#动态计算优先权
+			P = self.priority(time - self.processtable[job][0], jobs[job])
+			Property[job] = P
+		handle = sorted(Property.items(), key = lambda e:e[1])[-1]#根据优先权排序
+		time += jobs[handle[0]]
+		tat = self.TAT(time,self.processtable[handle[0]][0])
+		result.append([handle[0],str(time),str(tat),str(self.WTAT(tat,self.processtable[handle[0]][1]))] )				
+		pros.remove((handle[0],self.processtable[handle[0]]))
+		jobs.pop(handle[0])
+		Property.clear()		 
+	self.printResult(result)
 ```
 ### 结果
 
@@ -356,73 +309,42 @@ E的完成时间为: 17，周转时间为: 9，带权周转时间为: 4.5
 
 
 ```python
-# -*- coding: utf-8 -*-
-import time
-import console
-class store(object):
-	def __init__(self , Amount , LRS):
-		self.Amount = Amount
-		self.PhysicalBlock = []
-		self.LackofFrame = 0
-		self.RateofLack = 0.0
-		self.LRS = LRS #Logical Reference Sequence
+def LRU(self):
+	LackofFrame = 0.0
+	for addr in self.LRS:
+		time.sleep(1)
+		console.clear()
+		if addr not in self.PhysicalBlock:
+			self.PhysicalBlock.insert(0,addr)
+			if len(self.PhysicalBlock) > self.Amount :
+				self.PhysicalBlock.pop(-1)
+			LackofFrame += 1.0
+			print("   X ")
+		else:
+			self.PhysicalBlock.pop(self.PhysicalBlock.index(addr))
+			self.PhysicalBlock.insert(0,addr)
+			print("   Y ")
 		
-	def showPB(self):
-		for block in self.PhysicalBlock:
-			print("|  "+str(block) + "  |")
-			print(" -—--- ")
-	def LRU(self):
-		LackofFrame = 0.0
-		for addr in self.LRS:
-			time.sleep(1)
-			console.clear()
-			if addr not in self.PhysicalBlock:
-				self.PhysicalBlock.insert(0,addr)
-				if len(self.PhysicalBlock) > self.Amount :
-					self.PhysicalBlock.pop(-1)
-				LackofFrame += 1.0
-				print("   X ")
-			else:
-				self.PhysicalBlock.pop(self.PhysicalBlock.index(addr))
-				self.PhysicalBlock.insert(0,addr)
-				print("   Y ")
 			
-			
-			self.showPB()
-		print("缺页率：" + str(LackofFrame / len(self.LRS)))
-		print('缺页数：' + str(LackofFrame))
-	def FIFO(self):
-		LackofFrame = 0.0 
-		for addr in self.LRS:
-			time.sleep(1)
-			console.clear()
-			if addr not in self.PhysicalBlock:
-				self.PhysicalBlock.insert(0,addr)
-				if len(self.PhysicalBlock) > self.Amount:
-					self.PhysicalBlock.pop(-1)
-				LackofFrame += 1.0
-				print( "   X")
-			else:
-				print( "   Y")
-			self.showPB()
-				
-		print( "缺页率：" + str(LackofFrame / len(self.LRS)))
-		print( '缺页数：' + str(LackofFrame))
-				
-				
-if __name__ == "__main__":
-	pages = int(input('Enter amount of pages :'))
-	s = input('Enter the sequence of pages’ position separated by spaces(like 1 2 3 4 )')
-	command = input('Enter method :')
-	sequence = []
-	for i in s:
-		if i >= '0' and i <= '9':	
-			sequence.append(int(i))
-	s = store(pages,sequence)
-	if command == 'FIFO':
-		s.FIFO()
-	elif command == 'LRU':
-		s.LRU()
+		self.showPB()
+	print("缺页率：" + str(LackofFrame / len(self.LRS)))
+	print('缺页数：' + str(LackofFrame))
+	
+def FIFO(self):
+	LackofFrame = 0.0 
+	for addr in self.LRS:
+		time.sleep(1)
+		console.clear()
+		if addr not in self.PhysicalBlock:
+			self.PhysicalBlock.insert(0,addr)
+			if len(self.PhysicalBlock) > self.Amount:
+				self.PhysicalBlock.pop(-1)
+			LackofFrame += 1.0
+			print( "   X")
+		else:
+			print( "   Y")
+		self.showPB()
+
 		
 ```
 
@@ -454,108 +376,50 @@ FIFO：
 
 ### 代码
 
-```python
-# -*- coding: utf-8 -*-
-import matplotlib.path as mpath
-import matplotlib.patches as mpatches
-import matplotlib.pyplot as plt
+```python			
+def SSTF(self):
+	tag = 1
+	change = 0
+	distance = 0 
+	length = len(self.positions)
+	while self.positions:
+		P = self.Findnear(self.start)
+		if P[0] < self.start:
+			if tag > 0:
+				change += 1
+			tag = 0
+		else:
+			if tag == 0:
+				change += 1
+			tag = 1
+		distance += P[1]
+		self.start = P[0]
+		self.path.append(self.start)	
+		self.positions.remove(self.start)
 
+def SCAN(self) :
+	tag = 1
+	change = 1
+	distance = 0
+	p = self.start
+	length = len(self.positions)
+	self.positions.sort()
+	for i in self.positions:
+		if i < self.start:
+			continue
+		else:
+			distance += i - p
+			p = i 
+			self.path.append(p)
+	self.positions.reverse()
+	for i in self.positions:
+		if i < self.start:
+			distance += p - i
+			p = i
+			self.path.append(p)
+	print('平均寻道长度：'+str(float(distance)/length))		
+	print('移臂总量：' + str(change))
 
-class data (object):
-	def __init__ (self,start,positions):
-		self.positions = positions
-		self.start = start
-		self.path = [self.start]
-	def Findnear(self,p1):
-		small = 10000
-		p = p1
-		for i in self.positions:
-			distance = p1 - i if p1 > i else i - p1
-			if small > distance :
-				p = i
-				small = distance
-		return (p,small)
-				
-	def SSTF(self):
-		tag = 1
-		change = 0
-		distance = 0 
-		length = len(self.positions)
-		while self.positions:
-			P = self.Findnear(self.start)
-			if P[0] < self.start:
-				if tag > 0:
-					change += 1
-				tag = 0
-			else:
-				if tag == 0:
-					change += 1
-				tag = 1
-			distance += P[1]
-			self.start = P[0]
-			self.path.append(self.start)	
-			self.positions.remove(self.start)
-		print('平均寻道长度：'+str(float(distance)/length))		
-		print('移臂总量：' + str(change))
-		
-	def find(self,p1):
-		pass
-	
-	def SCAN(self) :
-		tag = 1
-		change = 1
-		distance = 0
-		p = self.start
-		length = len(self.positions)
-		self.positions.sort()
-		for i in self.positions:
-			if i < self.start:
-				continue
-			else:
-				distance += i - p
-				p = i 
-				self.path.append(p)
-		self.positions.reverse()
-		for i in self.positions:
-			if i < self.start:
-				distance += p - i
-				p = i
-			#self.positions.remove(i)
-				self.path.append(p)
-		print('平均寻道长度：'+str(float(distance)/length))		
-		print('移臂总量：' + str(change))
-		
-		
-	def drawpath(self):
-		y = range(len(self.positions)+1)
-		plt.clf()
-		plt.plot(self.path)
-		plt.ylabel("position")
-		plt.show()
-
-		
-if __name__ == "__main__":
-	command = input('Enter method (SCAN , SSTF , q):')
-	while command != 'q' :
-		origin = int(input('Enter the origin :'))
-		address = input('Enter the sequence of track’s address separated by spaces(like 1 2 3 4 )')
-		sequence = []
-		address = address.split(' ')
-		for i in address:
-			if '\n' not in i:	
-				sequence.append(int(i))
-			else:
-				sequence.append(int(i[:-1]))
-		test = data(origin,sequence)
-		if command == 'SSTF':
-			test.SSTF()
-			test.drawpath()	
-		elif command == 'SCAN':
-			test.SCAN()
-			test.drawpath()
-
-		command = input('Enter method (SCAN , SSTF , q):')
-	print('Quit!')
 ```
 
 ### 结果
@@ -588,150 +452,59 @@ SSTF的结果：
 ### 代码
 
 ```python
-# -*- coding: utf-8 -*-
-'''
-file:
-	filename
-	size
-'''
-import random
-import matplotlib.pyplot as plt
-import console
-import time
-import json
-
-class diskManager(object):
-	def __init__(self,size):
-		self.disk = {}
-		for i in range(size):
-			self.disk[str(i+1)] = {'state': 0,'filename':''}
-		self.index = {}# {'filename':[[position],[needSpace]]}
-		self.freeSpace = [{'first': 1,'space':500}]
-		#print(self.disk)
+def findSpace(self,needSpace):#返回disk中的地址和空闲表的位置
+	positionlist = []
+	for space in self.freeSpace:
+		if space['space'] >= needSpace:
+			
+			positionlist.append([space['first'],needSpace,self.freeSpace.index(space)])
+			return positionlist
+		else:
+			needSpace -= space['space']
+			positionlist.append([space['first'],space['space'],self.freeSpace.index(space)])		
+	print("error, file too big!")
 	
-	def store(self,file):
-		if file['filename'] in self.index:
-			print("file already exit!")
-			time.sleep(1)
-			console.clear()
-			return False
-		needSpace = int (file['size'] / 2) + 1 if file['size'] % 2 != 0 else int(file['size']/2) #计算所需块数
-		emptylist = []
-		positionlist = self.findSpace(needSpace) # 查找空闲的位置
-		if len(positionlist) == 1:
-			position = positionlist[0][0]
-			number = positionlist[0][2]
-			for i in range(position,position+needSpace): #存入disk
-				self.disk[str(i)]['state'] = 1
-				self.disk[str(i)]['filename'] = file['filename']
-			
-			
-			self.modifyFreeSpace('a',position,needSpace,number)
-			p = []
-			n =[ ]
-			for i in range(needSpace):
-				p.append(i+position)
-				n.append(1)
-			self.index[file['filename']] = [[position],[needSpace]] #将文件信息存入索引表
-		elif len(positionlist) > 0 :
-			p = []
-			n = []
-			for i in range(len(positionlist) ):
-				position = positionlist[i][0]
-				
-				needSpace = positionlist[i][1]
-				number = positionlist[i][2]
-				for j in range(position,position+needSpace): #存入disk
-					self.disk[str(j)]['state'] = 1
-					self.disk[str(j)]['filename'] = file['filename']
-				p.append(position)	
-				n.append(needSpace)	
-				
-				e = self.modifyFreeSpace('a',position,needSpace,number)
-				if e >= 0 :
-					 emptylist.append(e)
-			self.index[file['filename']] = [p,n] #将文件信息存入索引表
-		if emptylist:
-			j = 0
-			for i in emptylist:
-				self.freeSpace.pop(i-j)
-				j+=1
-			
-		return True
-	def findSpace(self,needSpace):#返回disk中的地址和空闲表的位置
-		positionlist = []
-		for space in self.freeSpace:
-			if space['space'] >= needSpace:
-				
-				positionlist.append([space['first'],needSpace,self.freeSpace.index(space)])
-				return positionlist
-			else:
-				needSpace -= space['space']
-				positionlist.append([space['first'],space['space'],self.freeSpace.index(space)])		
-		print("error, file too big!")
-	
-	
-	def modifyFreeSpace(self,method,position,needSpace,number = -1):
-		empty = -1
-		if method == 'a':
-			if self.freeSpace[number]['space'] == needSpace:
-				empty = number
-			elif self.freeSpace[number]['space'] > needSpace:
-				self.freeSpace[number]['first'] += needSpace
-				self.freeSpace[number]['space'] -= needSpace 
-			else:
-				print('error!')
-		elif method == 'd':
-			for i in self.freeSpace:
-				if i['first'] + i['space'] -1 == position - 1:
-					i['space'] += needSpace
-				elif position + needSpace  == i['first'] :
-					i['first'] = position
-					i['space'] += needSpace
-			i = 0
-			while (self.freeSpace[i]['first'] < position):
-				i += 1
-			self.freeSpace.insert(i,{"first":position,'space':needSpace})
+def modifyFreeSpace(self,method,position,needSpace,number = -1):
+	empty = -1
+	if method == 'a':
+		if self.freeSpace[number]['space'] == needSpace:
+			empty = number
+		elif self.freeSpace[number]['space'] > needSpace:
+			self.freeSpace[number]['first'] += needSpace
+			self.freeSpace[number]['space'] -= needSpace 
+		else:
+			print('error!')
+	elif method == 'd':
+		for i in self.freeSpace:
+			if i['first'] + i['space'] -1 == position - 1:
+				i['space'] += needSpace
+			elif position + needSpace  == i['first'] :
+				i['first'] = position
+				i['space'] += needSpace
+		i = 0
+		while (self.freeSpace[i]['first'] < position):
+			i += 1
+		self.freeSpace.insert(i,{"first":position,'space':needSpace})
 		
-		return empty
-			
-			
-	def delete(self,filename):
-		index = self.index[filename]
-		position = index[0]
-		needSpace = index[1]
-		for i in range(len(position)):
-			self.modifyFreeSpace('d',position[i],needSpace[i])
-			for j in range(position[i],position[i]+ needSpace[i]):
-				self.disk[str(j)]['state' ] = 0
-				self.disk[str(j)]['filename'] = ''
-		self.index.pop(filename)			
-	
-	def show(self,filename):
-		if filename not in self.index:
-			print("Not find file!")
-			return False
-		index = self.index[filename]
-		position = index[0]
-		needspace = index[1]
-		print(filename+"存储的位置有：",end='')
-		for i in range(len(position)):
-			for j in range(needspace[i]):
-				print(str(position[i]+j)+' ',end='')
-		return	True
+	return empty
+					
+def delete(self,filename):
+	index = self.index[filename]
+	position = index[0]
+	needSpace = index[1]
+	for i in range(len(position)):
+		self.modifyFreeSpace('d',position[i],needSpace[i])
+		for j in range(position[i],position[i]+ needSpace[i]):
+			self.disk[str(j)]['state' ] = 0
+			self.disk[str(j)]['filename'] = ''
+	self.index.pop(filename)			
 		
+def randomFile(self,amount,sizemin,sizemax,f):
+	for file in range(amount):
+		size = round(random.uniform(sizemin,sizemax))
+		filename = str(f + file)+".txt"
+		self.store({'filename':filename,'size':size})
 		
-	def randomFile(self,amount,sizemin,sizemax,f):
-		for file in range(amount):
-			size = round(random.uniform(sizemin,sizemax))
-			filename = str(f + file)+".txt"
-			self.store({'filename':filename,'size':size})
-		
-
-def init(size):
-	disk = diskManager(size)
-	return disk 
-
 def showfree(disk):
 	p = 1
 	size = []
@@ -765,149 +538,6 @@ def showfree(disk):
 	plt.text(1.2,-1.13,"Black: used\nWhite: free",horizontalalignment ='center',fontsize = 16,bbox = {'facecolor':'0.9','alpha':0.5,'pad': 5})
 	
 	plt.show()		
-	
-def page():
-	print("           Welcome to disk manager!\n" + \
-		  'MENU:\n'+\
-		  '           1. Creat a new disk\n' +\
-		  '           2. Show disk status\n'+\
-		  '           3. Add a new file\n' +\
-		  '           4. Create random files\n'+\
-		  '			 5. Delete files\n'+\
-		  '           6. Show file’s storage status\n'+\
-		  '           7. Quit')
-		  
-def diskload():
-	try :
-		print('loading')
-
-		d = open('disk.d','r')
-		f = open('freespace.d','r')
-		i = open('index.d','r')
-		diskdata = json.load(d)
-		freespace = json.load(f)
-		index = json.load(i)
-		disk=init(len(diskdata))
-		disk.disk=diskdata
-		disk.index=index
-		disk.freeSpace = freespace
-		d.close()
-		f.close()
-		i.close()
-		
-		return	disk
-	except :
-		return ''
-
-def disksave(disk):
-	d = open('disk.d','w+')
-	f = open('freespace.d','w+')
-	i = open('index.d','w+')
-	json.dump(disk.disk,d)
-	json.dump(disk.freeSpace,f)
-	json.dump(disk.index,i)
-	d.close()
-	f.close()
-	i.close()
-if __name__ == "__main__":
-	command = ''
-	disk = diskload()
-	newFileList = [{'filename':'A.txt','size':7},\
-				   {'filename':'B.txt','size':5},\
-				   {'filename':'C.txt','size':2},\
-				   {'filename':'D.txt','size':9},\
-				   {'filename':'E.txt','size':3.5}\
-				   ]
-	while(command != 7):
-		page()
-		command = int(input('Enter command number: '))
-		if command == 1:
-			console.clear()
-			size = int(input("Enter disk size: "))
-			disk = init(size)
-			disksave(disk)
-			print("Create success!🎉 🎊")
-			time.sleep(1)
-			console.clear()
-		elif command ==2:
-			console.clear()
-			if disk == '':
-				print("Please create a disk first!")
-				time.sleep(1)
-				console.clear()
-				continue
-			else:
-				showfree(disk)
-				command = input('Enter any key to return')
-				console.clear()
-		elif command == 3:
-			console.clear()
-			if disk == '':
-				print("Please create a disk first!")
-				time.sleep(1)
-				console.clear()
-				continue
-			else:
-				
-				while command != 'q':
-					print("There are some files. You can enter their names to add, or add a new file")
-					for file in newFileList:
-						print('name: ' +  file['filename']+ ' size:  '+str( file['size']))
-					name = input("Enter filename: ")
-					filesize = eval(input("Enter size: "))
-					s = disk.store(dict(filename = name,size = filesize))
-					if s :
-						print("Add success!")
-						disksave(disk)
-						time.sleep(1)
-						console.clear()
-					command = input("Enter q to quit add mode , c to continue")
-		elif command == 4:
-			console.clear()
-			if disk == '':
-				print("Please create a disk first!")
-				time.sleep(1)
-				console.clear()
-				continue
-			else:
-				amount = int(input("Enter amount: "))
-				sizemin = int(input("Enter min size of file size: "))
-				sizemax = int(input("Enter max size of file size: "))
-				filename = int(input("Enter filename format: "))
-				disk.randomFile(amount,sizemin,sizemax,filename)
-				print("Create success!")
-				disksave(disk)
-				time.sleep(1)
-				console.clear()
-		elif command == 5:
-			console.clear()
-			if disk == '':
-				print("Please create a disk first!")
-				time.sleep(1)
-				console.clear()
-				continue
-			else:
-				for file in range(1 , 50,2):
-					filename = str(file)+".txt"
-					disk.delete(filename)
-				print("Delete success!")
-				disksave(disk)
-				time.sleep(1)
-				console.clear()
-		elif command == 6:
-			console.clear()
-			if disk == '':
-				print("Please create a disk first!")
-				time.sleep(1)
-				console.clear()
-				continue
-			else:
-				filename = input("Enter filename: ")
-				disk.show(filename)
-				command = input('\nEnter any key to return')
-				console.clear()
-				
-
 ```
 ### 结果
 界面：
